@@ -64,11 +64,9 @@ jobs:
       - run: npm run build
 
       - name: Upload dist artifact # artifact (dossier généré par la pipeline qui se conserve)
-        uses: actions/upload-pages-artifact@v4 #action github pour stocker des fichiers
+        uses: actions/upload-pages-artifact@v3 #action github pour stocker des fichiers
         with:
-          name: ip-tracker-dist
           path: front/ip-tracker/dist #coller le contenu buildé dans dist
-          if-no-files-found: error #erreur si le dist n'existe pas
           retention-days: 7 #garder le dossier 7 jours
   deploy:
     runs-on: ubuntu-latest
