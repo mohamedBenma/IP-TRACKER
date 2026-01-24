@@ -11,6 +11,15 @@ defaults:
   run:
     working-directory: front/ip-tracker
 
+permissions:
+  contents: read #lire le contenu du repo
+  pages: write #publier sur github pages
+  id-token: write #générer un token pour login Github pages
+
+concurrency: #tjrs le dernier état (prendre en compte le dernier déploiement )
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   type-check:
     runs-on: ubuntu-latest
