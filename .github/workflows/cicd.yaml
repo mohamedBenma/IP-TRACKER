@@ -7,50 +7,57 @@ on:
   pull_request:
     branches:
       - main
+defaults:
+  run:
+    working-directory: front/ip-tracker
 
 jobs:
-  init:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: front/ip-tracker
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3 # recuperer le code source
-
-      - name: Set up Node # Ajout de la version de node utilsé
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.12.0"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
   type-check:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: front/ip-tracker
     steps:
-      - name: Run type check
-        run: npm run type-check
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: front/ip-tracker/package-lock.json
+
+      - run: npm ci
+      - run: npm run type-check
 
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: front/ip-tracker
+    needs: type-check
     steps:
-      - name: Run tests
-        run: npm run test
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: front/ip-tracker/package-lock.json
+
+      - run: npm ci
+      - run: npm run test
 
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: front/ip-tracker
+    needs: test
     steps:
-      - name: Run build
-        run: npm run build
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: front/ip-tracker/package-lock.json
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Upload dist artifact # artifact (dossier généré par la pipeline qui se conserve)
+        uses: actions/upload-artifact@v4 #action github pour stocker des fichiers
+        with:
+          name: ip-tracker-dist
+          path: front/ip-tracker/dist #coller le contenu buildé dans dist
+          if-no-files-found: error #erreur si le dist n'existe pas
+          retention-days: 7 #garder le dossier 7 jours
