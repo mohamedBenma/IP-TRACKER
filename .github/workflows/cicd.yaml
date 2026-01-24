@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  init:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -28,8 +28,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Type Check
+  type-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front/ip-tracker
+    steps:
+      - name: Run type check
         run: npm run type-check
 
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front/ip-tracker
+    steps:
       - name: Run tests
         run: npm run test
+
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front/ip-tracker
+    steps:
+      - name: Run build
+        run: npm run build
