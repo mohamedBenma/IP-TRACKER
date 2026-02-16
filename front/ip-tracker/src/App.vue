@@ -46,7 +46,9 @@ export default {
 
     async getOwnIp() {
       try {
-        const url = this.ip ? `https://ipwho.is/${this.ip}` : `https://ipwho.is/`
+        const url = this.ip
+          ? `https://ip-tracker-proxy.mbenmaouche09.workers.dev/?q=${this.ip}`
+          : `https://ip-tracker-proxy.mbenmaouche09.workers.dev/`
         const res = await fetch(url)
 
         if (!res.ok) throw new Error('Erreur API')
