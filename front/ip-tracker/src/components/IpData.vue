@@ -2,27 +2,60 @@
   <div class="ip-datas">
     <div class="box box-first">
       <span>IP ADDRESS</span>
-      <h1>{{ ipData?.ip }}</h1>
+      <h1>
+        <template v-if="!loading">
+          {{ displayData?.ip }}
+        </template>
+        <div v-else class="skeleton"></div>
+      </h1>
     </div>
     <div class="box">
       <span>LOCATION</span>
       <h1>
-        {{ ipData?.city }}, {{ ipData?.region_code }},
-        {{ ipData?.postal }}
+        <template v-if="!loading">
+          {{ displayData?.village }}, {{ displayData?.county }}, {{ displayData?.postal }},
+          {{ displayData?.country }}
+        </template>
+        <div v-else class="skeleton"></div>
       </h1>
     </div>
     <div class="box">
       <span>TIMEZONE</span>
-      <h1>UTC{{ ipData?.timezone?.utc }}</h1>
+      <h1>
+        <template v-if="!loading"> UTC{{ displayData?.timezone }} </template>
+        <div v-else class="skeleton"></div>
+      </h1>
     </div>
     <div class="box">
       <span>ISP</span>
-      <h1>{{ ipData?.connection?.isp }}</h1>
+      <h1>
+        <template v-if="!loading">
+          {{ displayData?.isp }}
+        </template>
+        <div v-else class="skeleton"></div>
+      </h1>
     </div>
   </div>
 </template>
 
 <style scoped>
+.skeleton {
+  height: 18px;
+  width: 80px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f5f5f5 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
 .ip-datas {
   position: relative;
   top: 20%;
@@ -93,22 +126,21 @@ span {
 </style>
 
 <script>
+import Loading from 'vue-loading-overlay'
+import 'vue-loading-overlay/dist/css/index.css'
+
 export default {
+  components: { Loading },
+
   props: {
-    ipData: {
+    displayData: {
       type: Object,
       required: false,
     },
-  },
-  methods: {},
-  mounted() {
-    console.log('ipdataMAP: ', this.ipData)
-  },
-  created() {
-    console.log(this.ipData)
-  },
-  updated() {
-    console.log('ipData mis à jour:', this.ipData)
+    loading: {
+      type: Boolean,
+      required: false,
+    },
   },
 }
 </script>
