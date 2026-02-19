@@ -6,19 +6,21 @@ test('renders IpData component', () => {
   const wrapper = mount(IpData)
   expect(wrapper.exists()).toBe(true)
 })
-describe('IpDAta.vue', () => {
-  const MockData = {
+describe('IpData.vue', () => {
+  const mockDisplayData = {
     ip: '122.122.33.11',
-    city: 'Béjaia',
-    region_code: 'Toudja',
+    village: 'Béjaia',
+    county: 'Toudja',
     postal: '06030',
-    timezone: { utc: '+00:00' },
-    connection: { isp: 'Mobilis' },
+    country: 'Algeria',
+    timezone: '+00:00',
+    isp: 'Mobilis',
   }
   test('display location data correctly', () => {
     const wrapper = mount(IpData, {
       props: {
-        ipData: MockData,
+        displayData: mockDisplayData,
+        loading: false,
       },
     })
     expect(wrapper.text()).toContain('122.122.33.11')
@@ -29,16 +31,19 @@ describe('IpDAta.vue', () => {
   test('display timezone and isp correctly', () => {
     const wrapper = mount(IpData, {
       props: {
-        ipData: MockData,
+        displayData: mockDisplayData,
+        loading: false,
       },
     })
+    expect(wrapper.text()).toContain('UTC')
     expect(wrapper.text()).toContain('+00:00')
     expect(wrapper.text()).toContain('Mobilis')
   })
   test('get right number of boxes', () => {
     const wrapper = mount(IpData, {
       props: {
-        ipData: MockData,
+        displayData: mockDisplayData,
+        loading: false,
       },
     })
     expect(wrapper.findAll('.box').length).toBe(4)

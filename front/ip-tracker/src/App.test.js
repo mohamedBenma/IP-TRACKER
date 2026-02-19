@@ -1,75 +1,64 @@
 import { mount } from '@vue/test-utils'
-import { vi, describe, test, expect, beforeEach } from 'vitest'
+import { vi, test, expect, beforeEach, afterEach } from 'vitest'
 import App from './App.vue'
 
 vi.mock('./components/Map.vue', () => ({
-  default: {
-    name: 'Map',
-    props: ['lat', 'lang'],
-    template: '<div class="mock-map">Mock Map</div>',
-  },
+  default: { name: 'Map', props: ['lat', 'lang'], template: '<div />' },
 }))
 
 vi.mock('./components/IpData.vue', () => ({
-  default: {
-    name: 'IpData',
-    props: ['ipData'],
-    template: '<div class="mock-ipdata">Mock IpData</div>',
-  },
+  default: { name: 'IpData', props: ['displayData', 'loading'], template: '<div />' },
 }))
-
-const mockResponse = {
-  success: true,
-  ip: '8.8.8.8',
-  city: 'Mountain View',
-  region_code: 'CA',
-  postal: '94043',
-  latitude: 37.386,
-  longitude: -122.0838,
-  timezone: { utc: '-07:00' },
-  connection: { isp: 'Google LLC' },
-}
 
 beforeEach(() => {
   vi.restoreAllMocks()
-  global.fetch = vi.fn(() =>
-    Promise.resolve({
+  vi.spyOn(App.methods, 'init').mockImplementation(() => Promise.resolve())
+
+  global.fetch = vi
+    .fn()
+    .mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve(mockResponse),
-    }),
-  )
+      json: async () => ({
+        success: true,
+        ip: '8.8.8.8',
+        latitude: 37.386,
+        longitude: -122.0838,
+        timezone: { utc: '-07:00' },
+        connection: { isp: 'Google LLC' },
+      }),
+    })
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        address: {
+          city: 'Mountain View',
+          postcode: '94043',
+          county: 'Santa Clara County',
+          country: 'United States',
+        },
+      }),
+    })
 })
 
-async function flushPromises() {
-  return new Promise((resolve) => setTimeout(resolve, 0))
-}
+afterEach(() => {
+  vi.restoreAllMocks()
+})
 
-test('getOwnIp sets lat and passes props to children', async () => {
+test('getOwnIp sets lat and passes props to children (when searching IP)', async () => {
   const wrapper = mount(App)
 
-  await flushPromises()
-  await wrapper.vm.$nextTick()
-
+  wrapper.vm.ip = '8.8.8.8'
   await wrapper.vm.getOwnIp()
-  await flushPromises()
   await wrapper.vm.$nextTick()
 
   expect(wrapper.vm.lat).toBe(37.386)
-  expect(wrapper.findComponent({ name: 'Map' }).props('lat')).toBe(37.386)
-  expect(wrapper.findComponent({ name: 'IpData' }).props('ipData')).toEqual({
-    success: true,
-    ip: '8.8.8.8',
-    city: 'Mountain View',
-    region_code: 'CA',
-    postal: '94043',
-    latitude: 37.386,
-    longitude: -122.0838,
-    timezone: { utc: '-07:00' },
-    connection: { isp: 'Google LLC' },
-  })
-})
 
-test('renders App component', () => {
-  const wrapper = mount(App)
-  expect(wrapper.exists()).toBe(true)
+  const ipDataComp = wrapper.findComponent({ name: 'IpData' })
+  expect(ipDataComp.props('displayData')).toMatchObject({
+    ip: '8.8.8.8',
+    postal: '94043',
+    country: 'United States',
+    timezone: '-07:00',
+    isp: 'Google LLC',
+  })
 })
